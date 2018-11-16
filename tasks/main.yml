@@ -1,0 +1,54 @@
+---
+- name: Create /usr/local/src
+  file: dest=/usr/local/src state=directory
+
+- name: Get fml
+  get_url:
+    url: ftp://ftp.fml.org/pub/fml/stable/fml-4.0-stable-20040215.tar.gz
+    dest: /usr/local/src/fml-4.0-stable-20040215.tar.gz
+
+- name: Unpack fml
+  unarchive:
+    src: /usr/local/src/fml-4.0-stable-20040215.tar.gz
+    dest: /usr/local/src/
+    copy: no
+    keep_newer: yes
+    creates: /usr/local/src/fml-4.0-stable-20040215/INSTALL.en
+
+- name: Copy fml patch
+  copy: src={{ item }} dest=/usr/local/src/fml-4.0-stable-20040215/{{ item }} mode=0644
+  with_items: 
+    - patch-cf__config
+    - patch-sbin__makefml
+    - patch-src__fml.pl
+    - patch-src__jcode.pl
+
+- name: Apply fml patch
+  shell: >
+    cd /usr/local/src/fml-4.0-stable-20040215 &&
+    patch -p0 < patch-cf__config &&
+    patch -p0 < patch-sbin__makefml &&
+    patch -p0 < patch-src__fml.pl &&
+    patch -p0 < patch-src__jcode.pl
+  args:
+    creates: /usr/local/src/fml-4.0-stable-20040215/src/jcode.pl.orig
+
+- name: Add fml group 
+  group: name={{ fml4_group }} gid={{ fml4_gid }}
+
+- name: Add fml user
+  user:
+    name:    "{{ fml4_user }}"
+    comment: "fml Mailing List Server"
+    uid:     "{{ fml4_uid }}"
+    group:   "{{ fml4_group }}"
+    shell:   /usr/local/bin/bash
+
+- name: Chown src dir
+  file: dest=/usr/local/src/fml-4.0-stable-20040215 owner={{ fml4_user }} group={{ fml4_group }} recurse=yes
+
+- name: Create bin dir
+  file: dest={{ fml4_bin_dir }} state=directory owner={{ fml4_user }} group={{ fml4_group }}
+
+- name: Create ml dir
+  file: dest={{ fml4_ml_dir }} state=directory owner={{ fml4_user }} group={{ fml4_group }}

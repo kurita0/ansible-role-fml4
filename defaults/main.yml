@@ -1,0 +1,6 @@
+fml4_user: fml
+fml4_uid: 60001
+fml4_group: fml
+fml4_gid: 60001
+fml4_bin_dir: /usr/local/fml
+fml4_ml_dir: /var/spool/ml
