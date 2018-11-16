@@ -1,4 +1,7 @@
 ---
+- name: Install gtar
+  pkgng: name=gtar state=present
+
 - name: Create /usr/local/src
   file: dest=/usr/local/src state=directory
 
